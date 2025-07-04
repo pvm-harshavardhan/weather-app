@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" href="./favlogo.png" type="image/x-icon">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="font-inter bg-gradient-to-br from-cyan-800 via-blue-900 to-cyan-600 min-h-screen text-gray-800 relative overflow-x-hidden">
+    
+    <!-- Background decoration -->
+    <div class="drop-shadow-2xl absolute inset-0 bg-gradient-to-br from-indigo-400/20 via-purple-500/20 to-pink-500/20"></div>
+
+    <div class="relative max-w-3xl mx-auto p-4 sm:p-6 lg:p-6 min-h-screen flex flex-col">
+        <header class="text-center mb-6 sm:mb-8 animate-fade-in">
+            <h1
+                class="text-white text-4xl sm:text-4xl lg:text-5xl font-bold drop-shadow-lg flex justify-center items-center gap-3">
+                <i class="fas fa-cloud-sun text-yellow-300 animate-pulse"></i>
+                <span class="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">Weather
+                    App</span>
+            </h1>
+        </header>
+
+        <div class="mb-6 sm:mb-8 animate-slide-up">
+            <div
+                class="flex max-w-xl mx-auto bg-white/95 backdrop-blur-sm rounded-full overflow-hidden shadow-xl border border-white/20">
+                <input type="text" id="cityInput" placeholder="Enter city name..." aria-label="City name"
+                    class="flex-1 px-4 sm:px-6 py-3 sm:py-4 border-none outline-none text-lg  font-medium rounded-l-full bg-transparent placeholder-gray-500 focus:ring-2 focus:ring-indigo-300 transition-all" />
+                <button id="searchBtn" aria-label="Search weather"
+                    class="bg-gradient-to-r from-cyan-800 via-blue-900 to-blue-900 px-4 sm:px-6 py-3 sm:py-4 text-white hover:from-cyan-800 hover:via-blue-900 hover:to-blue-900 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:ring-offset-2">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
+            </div>
+            <div class="flex flex-row justify-center items-center gap-3 sm:gap-4 mt-4">
+                <div class="relative">
+                    <button id="historyBtn" aria-label="View search history"
+                        class="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm border border-white/30 rounded-full text-gray-800 cursor-pointer font-medium transition-all duration-400 hover:bg-white hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                        <i class="fas fa-history text-indigo-500"></i>
+                        <span class="sm:inline">History</span>
+                    </button>
+                    <div id="historyDropdown"
+                        class="absolute left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl min-w-[200px] max-h-72 overflow-y-auto z-50 opacity-0 invisible transition-all duration-100 mt-2 border border-white/20">
+                        <div
+                            class="px-4 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-gray-200 font-semibold text-gray-800 rounded-t-xl text-sm">
+                            Recent Searches</div>
+                        <div id="historyList"></div>
+                    </div>
+                </div>
+                <button id="toggleUnitBtn" aria-label="Toggle temperature unit"
+                    class="flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-sm border border-white/30 rounded-full text-gray-800 cursor-pointer font-medium transition-all duration-300 hover:bg-white hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-300">
+                    <i class="fas fa-thermometer-half text-indigo-500"></i>
+                    <span id="unitText" class="font-semibold">°C</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="weather-container flex-1 animate-slide-up" id="weatherContainer">
+            <div
+                class="weather-card bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-6 sm:p-8 border border-white/20">
+                <div class="weather-header flex flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div class="location">
+                        <h2 id="cityName" class="text-2xl sm:text-3xl font-bold text-gray-800">--</h2>
+                        <p id="country" class="text-gray-600 font-medium">--</p>
+                    </div>
+                    <div class="date-time text-left sm:text-right">
+                        <p id="currentDate" class="text-sm text-gray-500 font-medium">--</p>
+                        <p id="currentTime" class="text-sm text-gray-500 font-medium">--</p>
+                    </div>
+                </div>
+
+                <div class="weather-main flex flex-row justify-between items-center mb-3 gap-6">
+                    <div class="temperature text-center sm:text-left">
+                        <h1 id="temperature"
+                            class="text-5xl sm:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            --°C</h1>
+                        <p id="feelsLike" class="text-gray-600 font-medium text-lg">Feels like --°C</p>
+                    </div>
+                    <div class="weather-icon flex flex-col items-center">
+                        <img id="weatherIcon" src="" alt="Weather condition"
+                            class="w-24 h-24 sm:w-28 sm:h-28 drop-shadow-lg" />
+                        <p id="weatherCondition" class="text-gray-700 font-semibold mt-3 text-center">--</p>
+                    </div>
+                </div>
+
+                <div class="weather-details grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-3 mb-2">
+                    <div
+                        class="detail-item flex items-center gap-4 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+                        <i class="fas fa-tint text-2xl text-indigo-500"></i>
+                        <div>
+                            <p class="label text-xs text-gray-500 font-medium uppercase tracking-wide">Humidity</p>
+                            <p id="humidity" class="font-bold text-lg text-gray-800">--%</p>
+                        </div>
+                    </div>
+                    <div
+                        class="detail-item flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-100">
+                        <i class="fas fa-wind text-2xl text-purple-500"></i>
+                        <div>
+                            <p class="label text-xs text-gray-500 font-medium uppercase tracking-wide">Wind Speed</p>
+                            <p id="windSpeed" class="font-bold text-lg text-gray-800">-- km/h</p>
+                        </div>
+                    </div>
+                    <div
+                        class="detail-item flex items-center gap-4 p-4 bg-gradient-to-r from-pink-50 to-red-50 rounded-xl border border-pink-100">
+                        <i class="fas fa-eye text-2xl text-pink-500"></i>
+                        <div>
+                            <p class="label text-xs text-gray-500 font-medium uppercase tracking-wide">Visibility</p>
+                            <p id="visibility" class="font-bold text-lg text-gray-800">-- km</p>
+                        </div>
+                    </div>
+                    <div
+                        class="detail-item flex items-center gap-4 p-4 bg-gradient-to-r from-red-50 to-orange-50 rounded-xl border border-red-100">
+                        <i class="fas fa-compress-arrows-alt text-2xl text-red-500"></i>
+                        <div>
+                            <p class="label text-xs text-gray-500 font-medium uppercase tracking-wide">Pressure</p>
+                            <p id="pressure" class="font-bold text-lg text-gray-800">-- mb</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="air-quality bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border border-blue-100"
+                    id="airQualitySection">
+                    <h3 class="font-bold text-lg mb-4 text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-leaf text-blue-500"></i>
+                        Air Quality
+                    </h3>
+                    <div class="aqi-container flex items-center gap-6">
+                        <div
+                            class="aqi-value text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                            <span id="aqiValue">--</span>
+                        </div>
+                        <div class="aqi-label">
+                            <p id="aqiLabel" class="text-gray-700 font-semibold text-lg">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading fixed inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-50"
+            id="loading">
+            <div
+                class="spinner border-4 border-indigo-400 border-t-transparent rounded-full w-16 h-16 animate-spin mb-6">
+            </div>
+            <p class="text-white text-lg font-medium">Loading weather data...</p>
+        </div>
+
+        <div class="error fixed inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm z-50"
+            id="error">
+            <div class="bg-white rounded-2xl p-8 max-w-md mx-4 shadow-2xl border border-red-200 relative">
+                <!-- Close button -->
+                <button id="closeErrorBtn" type="button"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl focus:outline-none"
+                    aria-label="Close error popup">
+                    &times;
+                </button>
+                <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4 text-center block"></i>
+                <p id="errorMessage" class="text-gray-800 text-center font-medium">City not found. Please try again.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
